@@ -10,18 +10,36 @@ import math
 
 
 class Data:
+    """
+    Дескриптор данных
+    """
+
     def __set_name__(self, owner, name):
         self.name = '_' + name
 
     def __get__(self, instance, owner):
+        """
+        Позволяет возвращать данные
+        """
         return getattr(instance, self.name)
 
     def __set__(self, instance, value):
+        """
+        Позволяет изменять значение данных
+        """
         setattr(instance, self.name, value)
 
 
 class Cell:
-    name = Data()
+    """
+    Класс, содержащий данные конкретной ячейки таблицы
+                Работа1     Работа2     Работа3
+
+        Имя1    время11     время12     время13
+        Имя2    время21     время22     время23
+        Имя3    время31     время32     время33
+    """
+    name = Data()  # объекты-свойства для считывания и изменения данных
     work = Data()
     x_coord = Data()
     y_coord = Data()
@@ -29,53 +47,83 @@ class Cell:
     fl_zero = Data()
 
     def __init__(self, value, name, work, x, y):
-        self.__value = value  # чтобы случайно не изменить значение
+        """
+        Данные ячейки при инициализации
+        :param value: время выполнения работы (конкретным работником конкретной работы)
+        :param name: имя исполнителя
+        :param work: наименование работы
+        :param x: координаты ячейки в матрице
+        :param y: координаты ячейки в матрице
+        """
+        self.__value = value  # __чтобы случайно не изменить значение
         self.name = name
         self.work = work
         self.x_coord = x
         self.y_coord = y
-        self.time_zero = None
-        self.fl_zero = True
+        self.time_zero = None  # переменная для расчетов - изменяется в процессе расчета
+        self.fl_zero = True  # нет ли нуля: True - нет
 
     @property
     def value(self):
+        """
+        :return: возвращает время выполнения работы (только возвращает - не изменяет)
+        """
         return self.__value
 
 
 class Matrix:
+    """
+        Класс, описывающий взаимодействие ячеек таблицы в процессе расчета
+                    Работа1     Работа2     Работа3
+
+            Имя1    время11     время12     время13
+            Имя2    время21     время22     время23
+            Имя3    время31     время32     время33
+        """
+
     def __init__(self):
-        self.cells_list = []
-        self.len_matrix = None
+        self.cells_list = []  # список объектов-ячеек
+        self.len_matrix = None  # длина квадратной матрицы
 
     def add_cell(self, cell):
+        """Добавляем новую ячейку"""
         self.cells_list.append(cell)
 
     def add_len_matrix(self, len_matrix):
+        """Вычисляем длину квадратной матрицы"""
         self.len_matrix = len_matrix
-
-        # редукция матрицы по строкам
 
     def line_reduct(self):
         """
-                Работа1     Работа2     Работа3
+        Редукция матрицы по строкам
+        [1, 2, 3] -> min_value_line == 1 -> [1 - 1, 2 - 1, 3 - 1] -> [0, 1, 2]
 
-        Имя1    время11     время12     время13
-        Имя2    время21     время22     время23
-        Имя3    время31     время32     время33
+                1  2  3
+                4  5  6
+                7  8  9
 
-        :return:
         """
         for x in range(self.len_matrix):
             min_value_line = math.inf  # бесконечность
             for y in range(self.len_matrix):
                 cell = self.get_cell(x, y)
                 value = cell.value
-                min_value_line = min(min_value_line, value)
+                min_value_line = min(min_value_line, value)  # вычисляем минимальный элемент строки
             for y in range(self.len_matrix):
                 cell = self.get_cell(x, y)
+                # из каждого элемента строки вычитаем минимальный элемент
                 cell.time_zero = cell.value - min_value_line
 
     def column_reduct(self):
+        """
+        Редукция матрицы по столбикам
+        [1, 4, 7] -> min_value_line == 1 -> [1 - 1, 4 - 1, 7 - 1] -> [0, 3, 6]
+
+                1  2  3
+                4  5  6
+                7  8  9
+
+        """
         for y in range(self.len_matrix):
             min_value_column = math.inf
             for x in range(self.len_matrix):
@@ -197,8 +245,8 @@ class Matrix:
                     answers.append(answ)
                     x_fl[answ.x_coord] = False
                     y_fl[answ.x_coord] = False
-            if len(answers) == self.len_matrix:
-                return answers
+                if len(answers) == self.len_matrix:
+                    return answers
             else:
                 count -= 1
         return answers
@@ -231,9 +279,9 @@ names, works = user_input_names()  # два списка с именами и р
 if check_input(names, works) is False:
     print("Введите данные еще раз")
     names, works = user_input_names()
-    while check_input(names, works) is False:
-        print("Введите данные еще раз")
-        names, works = user_input_names()
+while check_input(names, works) is False:
+    print("Введите данные еще раз")
+    names, works = user_input_names()
 
 cl = user_input_times(names, works)  # объект класса Matrix - список клеток
 count = 2
